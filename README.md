@@ -15,7 +15,8 @@
 │   │   └── imgs							# 测试图片
 │   │   └── videos							# 测试视频
 │   ├── weights								# 推理模型模型
-│   │   ├── *.pt							# PyTorch模型
+│   │   ├── darkface-m.pt				                # darkface数据集上训练的模型
+│   │   ├── widerface-m.pt                                              # WIDERFACE数据集上训练的模型
 │   ├── face_labeling.py					        # 主运行文件
 │   ├── Face-README.md					                # 项目说明
 │   └── requirements.txt					        # 脚本依赖包
