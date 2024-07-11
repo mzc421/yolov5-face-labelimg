@@ -1,6 +1,8 @@
-# Pascal VOC XML导出
-# 创建人：曾逸夫
-# 创建时间：2022-03-12
+# -*- coding:utf-8 -*-
+# @author: 牧锦程
+# @微信公众号: AI算法与电子竞赛
+# @Email: m21z50c71@163.com
+# @VX：fylaicai
 
 from xml.dom.minidom import Document
 

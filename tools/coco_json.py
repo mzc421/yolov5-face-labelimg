@@ -1,6 +1,9 @@
-# MS COCO JSON导出
-# 创建人：曾逸夫
-# 创建时间：2022-03-17
+# -*- coding:utf-8 -*-
+# @author: 牧锦程
+# @微信公众号: AI算法与电子竞赛
+# @Email: m21z50c71@163.com
+# @VX：fylaicai
+
 
 import json
 import sys
@@ -10,7 +13,6 @@ ROOT_PATH = sys.path[0]
 
 # coco json 相关信息，可自定义
 def coco_info():
-
     info = {
         "info": {
             "year": "",
@@ -25,16 +27,13 @@ def coco_info():
 
 # coco json 许可信息，可自定义
 def coco_licenses():
-
     licenses = {"licenses": [{"id": 1, "url": "", "name": ""}]}
-
     return licenses
 
 
 # coco json 类别信息
 # id=0, name="", supercategory:""
 def coco_categories(coco_categories_list):
-
     coco_categories_list_cp = coco_categories_list.copy()
     coco_categories_list = []
     coco_categories_list.append([0, "facelabel", "None"])
@@ -59,7 +58,6 @@ def coco_categories(coco_categories_list):
 # coco json 图片信息
 # id=0, license=1, file_name="", height=0, width=0, date_captured=""
 def coco_images(coco_imgs_list):
-
     coco_imgs_list_cp = coco_imgs_list.copy()
     coco_imgs_list = []
     for i in range(len(coco_imgs_list_cp)):
@@ -85,14 +83,12 @@ def coco_images(coco_imgs_list):
 
     images = {}
     images["images"] = imgs_list
-
     return images
 
 
 # coco json 标注信息
 # id=0, image_id=0, category_id=1, bbox=[x0, y0, bw, bh]
 def coco_annotations(coco_anno_list):
-
     coco_anno_list_cp = coco_anno_list.copy()
     coco_anno_list = []
     for i in range(len(coco_anno_list_cp)):

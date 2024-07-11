@@ -1,6 +1,9 @@
-# 时间格式化
-# 创建人：曾逸夫
-# 创建时间：2022-03-13
+# -*- coding:utf-8 -*-
+# @author: 牧锦程
+# @微信公众号: AI算法与电子竞赛
+# @Email: m21z50c71@163.com
+# @VX：fylaicai
+
 
 import sys
 
