@@ -60,7 +60,7 @@ python face_labeling.py --mode video --img_dir ./data/videos
 .
 ├── runs						# 人脸数据保存目录
 │   ├── exp						# 子目录
-│   │   ├── raw						# 原始图片
+│   │   ├── org						# 原始图片
 │   │   ├── tag						# 标记图片（包括：人脸检测框、人脸ID、置信度、帧ID、FPS、人脸总数，人脸尺寸类型（小、中、大）数量）
 │   │   ├── voc_xml					# PASCAL VOC XML 标注文件
 │   │   ├── coco_json				# MS COCO JSON 标注文件
@@ -76,7 +76,7 @@ python face_labeling.py --mode video --img_dir ./data/videos
 ├── runs						# 人脸数据保存目录
 │   ├── exp						# 子目录
 │	│   ├── video_name01			# 子视频目录
-│   │   │   ├── raw					# 原始图片
+│   │   │   ├── org					# 原始图片
 │   │   │   ├── tag					# 标记图片（包括：人脸检测框、人脸ID、置信度、帧ID、FPS、人脸总数，人脸尺寸类型（小、中、大）数量）
 │   │   │   ├── voc_xml				# PASCAL VOC XML 标注文件
 │   │   │   ├── coco_json			# MS COCO JSON 标注文件
