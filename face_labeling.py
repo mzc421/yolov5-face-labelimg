@@ -51,14 +51,9 @@ def parse_args(known=False):
     parser = argparse.ArgumentParser(description="Face Labeling v0.2.2")
     parser.add_argument("--device", default="0", type=str, help="cuda or cpu")
     parser.add_argument("--mode", default="video", type=str, choices=['video', 'img', 'webcam'], help="face labeling mode")
-    parser.add_argument("--img_dir",
-                        default=r"D:\BaiduNetdiskDownload\face-labeling-master\face-labeling-master\data\imgs",
-                        type=str, help="image dir")
-    parser.add_argument("--video_dir",
-                        default=r"D:\BaiduNetdiskDownload\face-labeling-master\face-labeling-master\data\videos",
-                        type=str, help="video dir")
+    parser.add_argument("--img_dir", default=r"./data/imgs", type=str, help="image dir")
+    parser.add_argument("--video_dir", default=r"./data/videos", type=str, help="video dir")
     parser.add_argument("--model_name", default="widerface-m.pt", type=str, help="model name")
-    parser.add_argument("--imgName", default="face_test", type=str, help="image name")
     parser.add_argument("--project", default="runs", type=str, help="frame save dir")
     parser.add_argument("--exp", default="exp", type=str, help="frame dir name")
     parser.add_argument("--nms_conf", default=0.45, type=float, help="model NMS confidence threshold")
@@ -73,8 +68,8 @@ def parse_args(known=False):
 
 
 # 人脸检测与信息提取
-def face_detect(file_path, mode, frame, model, frame_id, face_id, stride, names, auto, max_det, frame_savePath, conf_thres,
-                iou_thres, imgName, img_size=640, label_no_show=False, label_simple="dnt",
+def face_detect(show_path, frame_name, mode, frame, model, frame_id, face_id, stride, names, auto, max_det, frame_savePath, conf_thres,
+                iou_thres, img_size=640, label_no_show=False, label_simple="dnt",
                 label_progressBar="dnt", video_name="vide_name.mp4"):
     global coco_imgs_list, coco_anno_list, categories_id
 
@@ -165,7 +160,7 @@ def face_detect(file_path, mode, frame, model, frame_id, face_id, stride, names,
         cv2.putText(frame, f"FPS: {fps}", (0, 20), cv2.FONT_HERSHEY_COMPLEX,
                     0.6, (0, 255, 0), 1)
 
-    print(f"{file_path} {pred[0].shape[0] if len(det) else 'no'} detections, {dt.t * 1E3:.1f}ms")
+    print(f"{show_path} {pred[0].shape[0] if len(det) else 'no'} detections, {dt.t * 1E3:.1f}ms")
 
     # 人脸数量
     cv2.putText(frame, f"Face Num: {len(xyxy_list)}", (0, 60), cv2.FONT_HERSHEY_COMPLEX,
@@ -180,54 +175,54 @@ def face_detect(file_path, mode, frame, model, frame_id, face_id, stride, names,
     cv2.putText(frame, f"medium: {medium_num}", (0, 100), cv2.FONT_HERSHEY_COMPLEX, 0.6, (0, 255, 0), 1)
     cv2.putText(frame, f"large: {large_num}", (0, 120), cv2.FONT_HERSHEY_COMPLEX, 0.6, (0, 255, 0), 1)
 
-    imgName_faceid = f"{imgName}-{face_id}"  # 图片名称-FaceID
-
-    if mode == "webcam" and wait_key == ord("a"):
+    if mode == "webcam":
         # 捕获视频帧
-        cv2.imwrite(f"{frame_savePath}/org/{imgName_faceid}.jpg", frame_cp)  # 保存原始图片
-        cv2.imwrite(f"{frame_savePath}/tag/{imgName_faceid}.jpg", frame)  # 保存标记图片
+        cv2.imwrite(f"{frame_savePath}/org/{frame_name}.jpg", frame_cp)  # 保存原始图片
+        cv2.imwrite(f"{frame_savePath}/tag/{frame_name}.jpg", frame)  # 保存标记图片
 
         # 创建VOC XML文件
-        create_xml(f"{imgName_faceid}.jpg", f"{frame_savePath}/voc_xml/{imgName_faceid}.jpg",
+        create_xml(f"{frame_name}.jpg", f"{frame_savePath}/voc_xml/{frame_name}.jpg",
                    img_shape, clsName_list, xyxy_list, obj_size_style_list,
-                   f"{frame_savePath}/voc_xml/{imgName_faceid}.xml")
+                   f"{frame_savePath}/voc_xml/{frame_name}.xml")
 
-        create_yolo_txt(clsName_list, img_shape, xyxy_list, f"{frame_savePath}/yolo_txt/{imgName_faceid}.txt")
+        create_yolo_txt(clsName_list, img_shape, xyxy_list, f"{frame_savePath}/yolo_txt/{frame_name}.txt")
 
         # ------------加入coco图片信息和标注信息------------
-        coco_imgs_list.append([face_id, f"{imgName_faceid}.jpg", img_shape[1], img_shape[0],
+        coco_imgs_list.append([face_id, f"{frame_name}.jpg", img_shape[1], img_shape[0],
                                f"{datetime.now():%Y-%m-%d %H:%M:%S}", ])
         coco_anno_list.append(
             [[categories_id + i for i in range(len(xyxy_list))], face_id, clsName_list, xyxy_list])
         categories_id += len(xyxy_list)
 
         face_id += 1  # 人脸ID自增
+        return frame, wait_key, face_id
 
     elif mode == "img":
         # 捕获视频帧
-        cv2.imwrite(f"{frame_savePath}/raw/{imgName_faceid}.jpg", frame_cp)  # 保存原始图片
-        cv2.imwrite(f"{frame_savePath}/tag/{imgName_faceid}.jpg", frame)  # 保存标记图片
+        cv2.imwrite(f"{frame_savePath}/org/{frame_name}", frame_cp)  # 保存原始图片
+        cv2.imwrite(f"{frame_savePath}/tag/{frame_name}", frame)  # 保存标记图片
 
         # 创建VOC XML文件
-        create_xml(f"{imgName_faceid}.jpg", f"{frame_savePath}/voc_xml/{imgName_faceid}.jpg",
+        create_xml(f"{frame_name}", f"{frame_savePath}/voc_xml/{frame_name}",
                    img_shape, clsName_list, xyxy_list, obj_size_style_list,
-                   f"{frame_savePath}/voc_xml/{imgName_faceid}.xml", )
+                   f"{frame_savePath}/voc_xml/{frame_name[:-4]}.xml", )
 
-        create_yolo_txt(clsName_list, img_shape, xyxy_list, f"{frame_savePath}/yolo_txt/{imgName_faceid}.txt")
+        create_yolo_txt(clsName_list, img_shape, xyxy_list, f"{frame_savePath}/yolo_txt/{frame_name[:-4]}.txt")
 
         # ------------加入coco图片信息和标注信息------------
         coco_imgs_list.append([face_id,
-                               f"{imgName_faceid}.jpg", img_shape[1], img_shape[0],
+                               f"{frame_name}", img_shape[1], img_shape[0],
                                f"{datetime.now():%Y-%m-%d %H:%M:%S}", ])
         coco_anno_list.append([[categories_id + i for i in range(len(xyxy_list))],
                                face_id, clsName_list, xyxy_list])
         categories_id += len(xyxy_list)
-
         face_id += 1  # 人脸ID自增
+        return frame, face_id
 
     elif mode == "video":
+        imgName_faceid = f"{frame_name[:-4]}-{face_id}"
         # 捕获视频帧
-        cv2.imwrite(f"{frame_savePath}/{video_name}/raw/{imgName_faceid}.jpg", frame_cp)  # 保存原始图片
+        cv2.imwrite(f"{frame_savePath}/{video_name}/org/{imgName_faceid}.jpg", frame_cp)  # 保存原始图片
         cv2.imwrite(f"{frame_savePath}/{video_name}/tag/{imgName_faceid}.jpg", frame)  # 保存标记图片
 
         # 创建VOC XML文件
@@ -242,23 +237,16 @@ def face_detect(file_path, mode, frame, model, frame_id, face_id, stride, names,
         coco_imgs_list.append([face_id, f"{imgName_faceid}.jpg", img_shape[1], img_shape[0],
                                f"{datetime.now():%Y-%m-%d %H:%M:%S}", ])
         coco_anno_list.append([[categories_id + i for i in range(len(xyxy_list))], face_id, clsName_list, xyxy_list])
-
         categories_id += len(xyxy_list)
 
         face_id += 1  # 人脸ID自增
-
-    if mode == "webcam":
-        return frame, wait_key, face_id
-    elif mode == "img":
-        return frame, face_id
-    elif mode == "video":
         return frame, face_id
 
 
 @smart_inference_mode()
 def face_label(device="0", mode="webcam", img_dir="./data/imgs", video_dir="./data/videos", model_name="widerface-m",
-               imgName="face_test", project="runs", exp="exp", nms_conf=0.25, nms_iou=0.45, max_det=1000, img_size=640,
-               label_no_show=False, label_simple="dnt", label_progressBar="dnt"):
+               project="runs", exp="exp", nms_conf=0.25, nms_iou=0.45, max_det=1000, img_size=640, label_no_show=False,
+               label_simple="dnt", label_progressBar="dnt"):
     device = select_device(device)
     model = DetectMultiBackend(f"{ROOT_PATH}/weights/{model_name}", device=device)
     stride, names, pt = model.stride, model.names, model.pt
@@ -270,7 +258,7 @@ def face_label(device="0", mode="webcam", img_dir="./data/imgs", video_dir="./da
 
     if mode in ["webcam", "img"]:
         # 创建原始图片目录
-        Path(f"{frame_savePath}/raw").mkdir(parents=True, exist_ok=True)
+        Path(f"{frame_savePath}/org").mkdir(parents=True, exist_ok=True)
         # 创建标记图片目录
         Path(f"{frame_savePath}/tag").mkdir(parents=True, exist_ok=True)
         # 创建PASCAL VOC XML目录
@@ -292,13 +280,12 @@ def face_label(device="0", mode="webcam", img_dir="./data/imgs", video_dir="./da
     if mode == "webcam":
         cap = cv2.VideoCapture(0)  # 连接设备
         is_capOpened = cap.isOpened()  # 判断设备是否开启
-        count = 0
         frame_width = int(cap.get(3))  # 帧宽度
         frame_height = int(cap.get(4))  # 帧高度
         fps = cap.get(5)  # 帧率
         # 调用face webcam
         if is_capOpened:
-            vid_writer = cv2.VideoWriter(f"{frame_savePath}//tag/webcam.mp4",
+            vid_writer = cv2.VideoWriter(f"{frame_savePath}/tag/webcam.mp4",
                                          cv2.VideoWriter_fourcc(*'mp4v'), fps,
                                          (frame_width, frame_height))
 
@@ -306,13 +293,10 @@ def face_label(device="0", mode="webcam", img_dir="./data/imgs", video_dir="./da
             while is_capOpened:
                 _, frame = cap.read()  # 帧读取
                 cv2.namedWindow(FACELABELING_VERISON)  # 设置窗口
-                count += 1
-                file_path = count
                 # 人脸检测与信息提取
-                frame, wait_key, face_id = face_detect(file_path, mode, frame, model, frame_id, face_id, stride, names,
-                                                       pt, max_det, frame_savePath, nms_conf, nms_iou,
-                                                       imgName, img_size, label_no_show, label_simple,
-                                                       label_progressBar)
+                frame, wait_key, face_id = face_detect(frame_id, frame_id, mode, frame, model, frame_id, face_id, stride,
+                                                       names, pt, max_det, frame_savePath, nms_conf, nms_iou, img_size,
+                                                       label_no_show, label_simple, label_progressBar)
 
                 vid_writer.write(frame)
                 cv2.imshow(FACELABELING_VERISON, frame)  # 显示
@@ -342,8 +326,8 @@ def face_label(device="0", mode="webcam", img_dir="./data/imgs", video_dir="./da
             file_path = f"{img_dir}/{i}"
             frame = cv2.imread(file_path)
 
-            frame, face_id = face_detect(file_path, mode, frame, model, frame_id, face_id, stride, names, pt, max_det,
-                                         frame_savePath, nms_conf, nms_iou, imgName, img_size,
+            frame, face_id = face_detect(file_path, i, mode, frame, model, frame_id, face_id, stride, names, pt, max_det,
+                                         frame_savePath, nms_conf, nms_iou, img_size,
                                          label_no_show, label_simple, label_progressBar)
 
             frame_id += 1  # 帧ID自增
@@ -375,7 +359,7 @@ def face_label(device="0", mode="webcam", img_dir="./data/imgs", video_dir="./da
 
             if is_capOpened:
                 # 创建原始图片目录
-                Path(f"{frame_savePath}/{video_name}/raw").mkdir(parents=True, exist_ok=True)
+                Path(f"{frame_savePath}/{video_name}/org").mkdir(parents=True, exist_ok=True)
                 # 创建标记图片目录
                 Path(f"{frame_savePath}/{video_name}/tag").mkdir(parents=True, exist_ok=True)
                 # 创建PASCAL VOC XML目录
@@ -396,9 +380,9 @@ def face_label(device="0", mode="webcam", img_dir="./data/imgs", video_dir="./da
                         break
                     file_path = f'{video_path} [{count}/{video_frames}]'
                     count += 1
-                    frame, face_id = face_detect(file_path, mode, frame, model, frame_id, face_id, stride, names, pt,
+                    frame, face_id = face_detect(file_path, i, mode, frame, model, frame_id, face_id, stride, names, pt,
                                                  max_det, frame_savePath, nms_conf, nms_iou,
-                                                 imgName, img_size, label_no_show, label_simple,
+                                                 img_size, label_no_show, label_simple,
                                                  label_progressBar, video_name)
 
                     vid_writer.write(frame)
@@ -411,7 +395,7 @@ def face_label(device="0", mode="webcam", img_dir="./data/imgs", video_dir="./da
                 input_video.release()
                 cv2.destroyAllWindows()
 
-                frame_save_msg = f"共计{face_id}张人脸图片，保存至{frame_savePath}/{video_name}/raw"
+                frame_save_msg = f"共计{face_id}张人脸图片，保存至{frame_savePath}/{video_name}/org"
                 frametag_save_msg = f"共计{face_id}张人脸标记图片，保存至{frame_savePath}/{video_name}/tag"
                 xml_save_msg = f"共计{face_id}个人脸xml文件，保存至{frame_savePath}/{video_name}/voc_xml"
                 json_save_msg = f"共计1个人脸json文件，保存至{frame_savePath}/{video_name}/coco_json"
@@ -424,7 +408,7 @@ def face_label(device="0", mode="webcam", img_dir="./data/imgs", video_dir="./da
                 table.add_column("个数", justify="center", style="#FFFDA2")
                 table.add_column("保存路径", justify="left", style="#BAFFB4", no_wrap=True)
 
-                table.add_row("人脸图片", f"{face_id}", f"{frame_savePath}/{video_name}/raw")
+                table.add_row("人脸图片", f"{face_id}", f"{frame_savePath}/{video_name}/org")
                 table.add_row("人脸标记图片", f"{face_id}", f"{frame_savePath}/{video_name}/tag")
                 table.add_row("人脸XML文件", f"{face_id}", f"{frame_savePath}/{video_name}/voc_xml")
                 table.add_row("人脸JSON文件", "1", f"{frame_savePath}/{video_name}/coco_json")
@@ -456,7 +440,7 @@ def face_label(device="0", mode="webcam", img_dir="./data/imgs", video_dir="./da
     rich_log(f"{outTimeMsg}\n")  # 记录用时
 
     if mode in ["webcam", "img"]:
-        frame_save_msg = f"共计{face_id}张人脸图片，保存至{frame_savePath}/raw"
+        frame_save_msg = f"共计{face_id}张人脸图片，保存至{frame_savePath}/org"
         frametag_save_msg = f"共计{face_id}张人脸标记图片，保存至{frame_savePath}/tag"
         xml_save_msg = f"共计{face_id}个人脸xml文件，保存至{frame_savePath}/voc_xml"
         json_save_msg = f"共计1个人脸json文件，保存至{frame_savePath}/coco_json"
@@ -469,7 +453,7 @@ def face_label(device="0", mode="webcam", img_dir="./data/imgs", video_dir="./da
         table.add_column("个数", justify="center", style="#FFFDA2")
         table.add_column("保存路径", justify="left", style="#BAFFB4", no_wrap=True)
 
-        table.add_row("人脸图片", f"{face_id}", f"{frame_savePath}/raw")
+        table.add_row("人脸图片", f"{face_id}", f"{frame_savePath}/org")
         table.add_row("人脸标记图片", f"{face_id}", f"{frame_savePath}/tag")
         table.add_row("人脸XML文件", f"{face_id}", f"{frame_savePath}/voc_xml")
         table.add_row("人脸JSON文件", "1", f"{frame_savePath}/coco_json")
@@ -478,10 +462,6 @@ def face_label(device="0", mode="webcam", img_dir="./data/imgs", video_dir="./da
         console.print(table)
 
 
-def main(args):
-    face_label(**vars(args))
-
-
 if __name__ == "__main__":
     args = parse_args()
-    main(args)
+    face_label(**vars(args))
